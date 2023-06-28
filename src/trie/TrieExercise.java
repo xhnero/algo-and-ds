@@ -3,17 +3,46 @@ import java.util.*;
 
 public class TrieExercise {
     public static void main(String[] args) {
+        final String [] strs = {"ab", "a"};
+        System.out.println(new TrieExercise().getLongestCommonPrefix(strs));
+    }
+
+    /**
+     * find the longest common prefix eg. flight, flow, flood have 'fl' as their longest common prefix
+     * The ide is put all words to trie and search for each level such that number of children is 1, keep searching until
+     * root is null or end of word. We also need to check for empty word since an empty string cannot be inserted, so
+     * there is possibility not all words can be inserted ( trie.numberOfWords != input.length)
+     * @param strs an array contain words
+     * @return
+     */
+    public String getLongestCommonPrefix(final String [] strs){
         final Trie trie = new Trie();
-        trie.insert("the");
-        trie.insert("a");
-        trie.insert("there");
-        trie.insert("answer");
-        trie.insert("by");
-        trie.insert("bye");
-        trie.insert("their");
-        trie.insert("abc");
-        List<String> res = trie.getWords(trie.root);
-        System.out.println();
+        for(final String val: strs){
+            trie.insert(val);
+        }
+        if(strs.length != trie.numberOfWord){
+            return "";
+        }
+        TrieNode root = trie.root;
+        final StringBuilder sb = new StringBuilder();
+        while (root != null && !root.isEndWord){
+            final TrieNode [] children = root.children;
+            int count = 0;
+            int idx = 0;
+            for(int i = 0; i < 26; i++){
+                if(children[i] != null){
+                    root = children[i];
+                    count ++;
+                    idx = i;
+                }
+            }
+            if(count > 1 || count == 0){
+                return sb.toString();
+            }
+            final char val = (char) (idx + 'a');
+            sb.append(val);
+        }
+        return sb.toString();
     }
 
     /**
@@ -21,6 +50,7 @@ public class TrieExercise {
      */
     private static class Trie {
         private TrieNode root;
+        private int numberOfWord = 0;
 
         public Trie() {
             root = new TrieNode();
@@ -41,7 +71,7 @@ public class TrieExercise {
          * @param key
          */
         public void insert(final String key) {
-            if (key == null) {
+            if (key == null || key.isEmpty()) {
                 return;
             }
             TrieNode currentNode = root;
@@ -54,6 +84,7 @@ public class TrieExercise {
                 }
                 currentNode = currentNode.children[currentIdx];
             }
+            numberOfWord ++;
             currentNode.markAsLeaf();
         }
 
